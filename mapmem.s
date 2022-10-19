@@ -1,4 +1,3 @@
-
 @ Função para fazer o mapeamento dos pinos na memória.
 @ R8 - Retorno: Endereço de memória base da GPIO. 
 
@@ -11,7 +10,7 @@
 .global mapMem
 
 mapMem: 
-    push{r4, r5, r7} @ Salva os registradores que usamos.
+    push {r4, r5, r7} @ Salva os registradores que usamos.
     ldr r0, =devmem
     mov r1, #0x1b0
     orr r1, #0x006
@@ -33,9 +32,12 @@ mapMem:
     pop {r4, r5, r7} @ Restora o valor dos registradores.
     bx lr @ Retorno da função
 
-.data
 
-@ Local do arquivo para puxar os endereços de memória.
+
+.data
 devmem: .asciz "/dev/mem"
-@ Endereço de memória para fazer o mapeamento dos pinos.
+@ Endereço de memória dos registradores GPIO.
 gpioaddr: .word 0x20200
+
+
+

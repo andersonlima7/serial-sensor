@@ -1,8 +1,12 @@
-LIBOBJS = turn.o
-all: displaytst2
+LIBOBJS = display.o mapmem.o
+
+all: main
+
 %.o : %.s
- as $(DEBUGFLGS) $(LSTFLGS) $< -o $@
+	as $(DEBUGFLGS) $(LSTFLGS) $< -o $@
+
 libdisplay.a: $(LIBOBJS)
- ar -cvq libdisplay.a turn.o
-displaytst2: displaytst.c libdisplay.a
- gcc -o displaytst2 displaytst.c libdisplay.a
+	ar -cvq libdisplay.a display.o mapmem.o
+
+main: main.c libdisplay.a
+	gcc -o main main.c libdisplay.a
