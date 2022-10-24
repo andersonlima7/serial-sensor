@@ -14,7 +14,7 @@ extern void writeChar(char c);              // Escreve qualquer char;
  * Recebe uma string e manda para o display.
 */
 void writeLCD(char string[])  {
-    int length = srtlen(string);
+    int length = strlen(string);
     for (int i = 0; i< length; i++){
         writeChar(string[i]);
     }
@@ -25,12 +25,12 @@ int main()
     mapMem();
     initLCD();
     // writeNumber(123);
-    writeChar('T');
+    // writeChar('S');
     // writeChar('i');
     // writeChar('m');
     // writeChar('a');
     // writeChar('o');
-    writeLCD("Timao");
+    writeLCD("Sensor1: 10");
 
     return(0);
 }

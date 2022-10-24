@@ -137,25 +137,25 @@
 
         @ Coluna
         @ D4
-        mov r9, #0b00010000      
+        mov r9, #0b00010000     @16 
         and r9, \value          @0001 & 0011 -> 0001
         lsr r9, #4
         GPIOTurn D4, r9
 
         @ D5
-        mov r9, #0b00100000   
+        mov r9, #0b00100000     @32
         and r9, \value          @ 0010 & 0011 -> 0010
-        lsr r9, #5             @ Desloca o bit 1x para direita  -> 0001
+        lsr r9, #5              @ Desloca o bit 1x para direita  -> 0001
         GPIOTurn D5, r9
 
         @ D6
-        mov r9, #0b01000000      
+        mov r9, #0b01000000     @64
         and r9, \value          @ 0100 & 0101 -> 0100
-        lsr r9, #6             @ Desloca o bit 2x para direita  -> 0001
+        lsr r9, #6              @ Desloca o bit 2x para direita  -> 0001
         GPIOTurn D6, r9
 
         @ D7
-        mov r9, #0b10000000      
+        mov r9, #0b10000000     @128
         and r9, \value          @ 01000 & 01000 -> 01000
         lsr r9, #7              @ Desloca o bit 3x para direita  -> 00001
         GPIOTurn D7, r9
@@ -387,6 +387,7 @@ time1s: .word 1
         .word 000000000
 
 
+mask16: 
 
 @ E - Enable 
 @ Esse pino é usado para habilitar o LCD quando um pulso de nível lógico alto para baixo é dado por ele.
