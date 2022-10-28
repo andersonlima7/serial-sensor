@@ -73,13 +73,27 @@ void loop() {
 
   ArduinoOTA.handle();
   while(Serial.available() > 0) {
-    char c = Serial.read();
-    if(c == '2') {
-      digitalWrite(led_pin, LOW);
-    } 
-    else if (c == '3'){
-      digitalWrite(led_pin, HIGH);
+    char c1 = Serial.read(); //Comando
+    delay(500);
+    char c2 = Serial.read();
+
+    switch(c1){
+      case '3':
+        Serial.write("0");
+        break;
+      case '4':
+        Serial.write("1");
+        break;
+      case '5':
+        Serial.write("2");
+        break;
+      case '6':
+        Serial.write("LED");
+        digitalWrite(led_pin, LOW); //Acende o led
+        break;
     }
+
+
     delay(1000);
   }
 }

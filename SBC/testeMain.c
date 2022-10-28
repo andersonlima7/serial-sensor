@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -5,19 +6,35 @@
 #include <fcntl.h>   //Usado para UART
 #include <termios.h> //Usado para UART
 
-void uart_tx(char *tx_string, int uart_filestream); // Funcao para envio de dados
-void uart_rx(int uart_filestream, char *dado);      // Funcao para recebimento de dados
+extern void mapMem();
+extern void initLCD();
+extern void clearLCD();
+extern void writeChar(char c);  //Escreve no display.
+
+
+/**
+ * Recebe uma string e escreve  no display.
+*/
+void writeLCD(char string[])  {
+    int length = strlen(string);
+    for (int i = 0; i< length; i++){
+        writeChar(string[i]);
+    }
+}
 
 int main()
 {
+    mapMem();
+    initLCD();
+    clearLCD();
     int sensor = 0;                   // Armazena a opcao do sensor selecionado pelo usuÃ¡rio
     int comando = 0;                  // Armazena a opcao de comando selecionado pelo usuÃ¡rio
     unsigned char comandoResposta[9]; // Armazena o comando de resposta lido pelo rx
 
-    char atual[] = "0x03";     // codigo da situacao atual
-    char analogico[] = "0x04"; // codigo do valor da entrada analogica
-    char digital[] = "0x05";   // codigo do valor da entrada digital
-    char led[] = "0x06";       // codigo para acender o led
+    char atual[] = "3";     // codigo da situacao atual
+    char analogico[] = "4"; // codigo do valor da entrada analogica
+    char digital[] = "5";   // codigo do valor da entrada digital
+    char led[] = "6";       // codigo para acender o led
 
     //-----------------------------------------------------------------------------------------------------------------------------------
     // Configuracao da UART
@@ -40,8 +57,8 @@ int main()
     tcsetattr(uart_filestream, TCSANOW, &options);
 
     // Solicita ao usuario o sensor que deseja obter informacoes
-    printf("\nInforme o valor do sensor do qual deseja obter informações");
-    scanf("%i", &sensor);
+    // printf("\nInforme o valor do sensor do qual deseja obter informações\n");
+    // scanf("%i", &sensor);
     // Tratar valor
 
     //----------------------------------------------------------------------------------------------------------------------------------
@@ -135,7 +152,7 @@ int main()
         {
             // Byte recebido
             comandoResposta[rx_length] = '\0';
-            // printf(comandoResposta);
+            printf(comandoResposta);
             printf("%i", read(uart_filestream, (void *)comandoResposta, 8));
             if (strcmp(comandoResposta, "0x1F") == 0)
             {
@@ -233,4 +250,7 @@ void uart_rx(int uart_filestream, char *dado)
     {
         printf("\nFalha na abertura do arquivo");
     }
+    return(0);
 }
+
+
