@@ -23,5 +23,6 @@ int main()
     mapMem();
     initLCD();
     clearLCD();
+    writeLCD("Ola");
     return(0);
 }
