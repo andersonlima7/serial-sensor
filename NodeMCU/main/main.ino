@@ -24,6 +24,10 @@ const char* password = STAPSK;
 int ledPin = LED_BUILTIN; // Pino do LED.
 const int sensorAnalog = A0; // Entrada analógica.
 
+//Variáveis que guardam o comando e o endereço do sensor na requisição.
+byte command;
+byte address;
+
 // Variáveis para guardar os valores dos sensores.
 int analogValue = 0; // Valor lido da entrada analógica.
 int digitalValue = 0; // Valor lido dos sensores digitais.
@@ -113,6 +117,8 @@ void setup() {
   code_uploaded();
   OTA_setup(); 
   pinMode(ledPin,OUTPUT);
+  command = -1; // Comando requisitado
+  address = -1; // Endereço requisitado
   digitalWrite(ledPin,HIGH);
   Serial.begin(9600);
 }
@@ -121,49 +127,46 @@ void loop() {
   ArduinoOTA.handle();
 
   while(Serial.available() > 0) {
-    char c1 = Serial.read(); //Comando
+    command = Serial.read(); //Comando
     delay(500);
-    char c2 = Serial.read(); // Endereço do sensor
+    address = Serial.read(); // Endereço do sensor
 
-    switch(c1){
-      case '3': // Situação do NodeMCU
-        Serial.write("0");                      // NodeMCU funcionando OK.
+    switch(command){
+      case 0x03: // Situação do NodeMCU
+        command = 0x00;
+        Serial.write(command);                      // NodeMCU funcionando OK.
         break;
-      case '4': // Valor da entrada analógica.
-        // Tipo de resposta - 1NDADO
-        /**
-         * N - Quantidade de dígitos do valor lido, pode ser de 1 a 4.
-         * DADO - O número lido pela entrada analógica, de 0 a 1023.
-        */
-        analogValue = analogRead(sensorAnalog);       // Ler o valor atual da entrada analógica.
-        int length = numberDigits(analogValue);
-        char valueString[length + 1];                // n dígitos + 1 para o \O
-        sprintf(valueString, "%ld", number);         // Int para string
-        char lengthChar = length + '0'; 
-        char message[length + 3];                      // Resposta a requisição da entrada analógica.
-        message[0] = '1';
-        message[1] = lengthChar;                    // Tamanho do valor da entrada analógica.
-        strcat(message, valueString);               // Cria a mensagem de resposta.
-        Serial.write(message, 7);
+      case 0x04: // Valor da entrada analógica.
+        analogValue = analogRead(sensorAnalog);       // Ler o valor atual da entrada analógica. 
+        command = 0x01;            //
+        Serial.write(command);
+        Serial.print(analogValue);
         break;
-      case '5': // Valor da entrada digital.
-        int pino = c2 - '0';                        // Valor do pino
-        pinMode(pino, INPUT);                       // Define o pino como entrada.
-        digitalValue = digitalRead(pino);           // Ler o valor do pino
-        char valor = digitalValue + '0';
-        char message[3] = "2";
-        message[1] = valor; 
-        Serial.write(message, 3);
+      case 0x05: // Valor da entrada digital.
+      {
+        int pino = address;                    // Valor do pino
+        pinMode(pino, INPUT);                        // Define o pino como entrada.
+        digitalValue = digitalRead(pino);            // Ler o valor do pino
+        command = 0x02;
+        Serial.write(command);
+        Serial.write(digitalValue);
+      }
         break;
-      case '6': //Controla o LED, ligando se estiver desligado ou desligando se estiver ligado.
+      case 0x06: //Controla o LED, ligando se estiver desligado ou desligando se estiver ligado.
         digitalWrite(ledPin, !digitalRead(ledPin));
         if(digitalRead(ledPin)) // LED ligado
-          Serial.write('3');
-        else
-          Serial.write('4');
-        char message[3] = "3"
+        {
+          command = 0x03;
+          Serial.write(command);
+        }
+        else {
+          command = 0x04;
+          Serial.write(command);
+        }
         break;
       default:
+          command = 0x1F;
+          Serial.write(command);
           break;
     }
 
