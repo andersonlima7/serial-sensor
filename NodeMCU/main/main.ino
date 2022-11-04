@@ -2,19 +2,24 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include <stdio.h>
-#include <string.h>
 
 #ifndef STASSID
 #define STASSID "INTELBRAS"
 #define STAPSK  "Pbl-Sistemas-Digitais"
 #endif
 
-const char* ssid = STASSID;
-const char* password = STAPSK;
+
+// Definições de rede
+IPAddress local_IP(10, 0, 0, 109);
+IPAddress gateway(10, 0, 0, 1);
+IPAddress subnet(255, 255, 0, 0);
+
+// Nome do ESP na rede
 const char* host = "ESP-10.0.0.109";
 
-// Entradas e saídas
+
+const char* ssid = STASSID;
+const char* password = STAPSK;
 
 int ledPin = LED_BUILTIN; // Pino do LED.
 const int sensorAnalog = A0; // Entrada analógica.
@@ -24,72 +29,92 @@ int analogValue = 0; // Valor lido da entrada analógica.
 int digitalValue = 0; // Valor lido dos sensores digitais.
 
 
-#define N_DIMMERS 3
-int dimmer_pin[] = {14, 5, 15};
-IPAddress local_ip 
+
+void code_uploaded(){
+  for(int i=0;i<2;i++){
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(150);
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(150);
+  }
+}
+
+void OTA_setup(){
+  
+  Serial.begin(115200);
+  Serial.println("Booting");
+
+  // Configuração do IP fixo no roteador, se não conectado, imprime mensagem de falha
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+    Serial.println("STA Failed to configure");
+  }
+
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
+    ESP.restart();
+  }
+
+  // Port defaults to 8266
+  // ArduinoOTA.setPort(8266);
+
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname(host);
+
+  // No authentication by default
+  // ArduinoOTA.setPassword("admin");
+
+  // Password can be set with it's md5 value as well
+  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH) {
+      type = "sketch";
+    } else { // U_FS
+      type = "filesystem";
+    }
+
+    // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+    Serial.println("Start updating " + type);
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) {
+      Serial.println("Auth Failed");
+    } else if (error == OTA_BEGIN_ERROR) {
+      Serial.println("Begin Failed");
+    } else if (error == OTA_CONNECT_ERROR) {
+      Serial.println("Connect Failed");
+    } else if (error == OTA_RECEIVE_ERROR) {
+      Serial.println("Receive Failed");
+    } else if (error == OTA_END_ERROR) {
+      Serial.println("End Failed");
+    }
+  });
+  ArduinoOTA.begin();
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());  
+}
 
 
 void setup() {
-  Serial.begin(115200); // Define a UART com um baud rate de 115200;
-
-  pinMode(ledPin, OUTPUT); // Define o pino do LED como saída.
-  // pinMode(sensor1, INPUT);  // Define os pinos dos sensores digitais como entrada.
-  // pinMode(sensor2, INPUT); 
-  // pinMode(sensor3, INPUT); 
-  // pinMode(sensor4, INPUT); 
-  // pinMode(sensor5, INPUT); 
-  // pinMode(sensor6, INPUT); 
-  // pinMode(sensor7, INPUT); 
-  // pinMode(sensor8, INPUT); 
-  
-  //Mask 255.255.0.0
-
-  // Configuração do WIFI
-  Serial.println("Booting");
-  WiFi.config(IPAddress local_ip, IPAddress gateway, IPAddress subnet)
-  WiFi.mode(WIFI_STA);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    WiFi.begin(ssid, password);
-    Serial.println("Retrying connection...");
-  }
-  /* switch off led */
-  digitalWrite(ledPin, HIGH);
-
-  /* configure dimmers, and OTA server events */
-  analogWriteRange(1000);
-  analogWrite(ledPin, 990);
-
-  for (int i = 0; i < N_DIMMERS; i++) {
-    pinMode(dimmer_pin[i], OUTPUT);
-    analogWrite(dimmer_pin[i], 50);
-  }
-
-  ArduinoOTA.setHostname(host);
-  ArduinoOTA.onStart([]() { // switch off all the PWMs during upgrade
-    for (int i = 0; i < N_DIMMERS; i++) {
-      analogWrite(dimmer_pin[i], 0);
-    }
-    analogWrite(ledPin, 0);
-  });
-
-  ArduinoOTA.onEnd([]() { // do a fancy thing with our board led at end
-    for (int i = 0; i < 30; i++) {
-      analogWrite(ledPin, 127);
-      delay(50);
-    }
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    (void)error;
-    ESP.restart();
-  });
-
-  /* setup the OTA server */
-  ArduinoOTA.begin();
-  Serial.println("Ready");
+  code_uploaded();
+  OTA_setup(); 
+  pinMode(ledPin,OUTPUT);
+  digitalWrite(ledPin,HIGH);
+  Serial.begin(9600);
 }
 
 void loop() {

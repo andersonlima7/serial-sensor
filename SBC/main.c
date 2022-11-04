@@ -4,10 +4,12 @@
 #include <unistd.h>  //Usado para UART
 #include <fcntl.h>   //Usado para UART
 #include <termios.h> //Usado para UART
+#include "initDisplay.h"
 
 
 void uart_tx(char *tx_string, int uart_filestream); // Funcao para envio de dados
 void uart_rx(int uart_filestream, char *dado);      // Funcao para recebimento de dados
+
 
 int main()
 {
@@ -15,10 +17,10 @@ int main()
     int comando = 0;                  // Armazena a opcao de comando selecionado pelo usuÃ¡rio
     unsigned char comandoResposta[9]; // Armazena o comando de resposta lido pelo rx
 
-    char atual = '3';     // codigo da situacao atual
-    char analogico = '4'; // codigo do valor da entrada analogica
+    char atual[] = "3";     // codigo da situacao atual
+    char analogico[] = "4"; // codigo do valor da entrada analogica
     char digital[3] = "5";   // codigo do valor da entrada digital
-    char led = '6';       // codigo para acender/desligar o led
+    char led[] = "6";       // codigo para acender/desligar o led
 
     //-----------------------------------------------------------------------------------------------------------------------------------
     // Configuracao da UART
@@ -33,7 +35,7 @@ int main()
     // Struct para configuracao dos parametros de comunicacao
     struct termios options;
     tcgetattr(uart_filestream, &options);
-    options.c_cflag = B115200 | CS8 | CLOCAL | CREAD; // Seta Baud-Rate para 115200, tamanho de 8 bits e sem paridade
+    options.c_cflag = B9600 | CS8 | CLOCAL | CREAD; // Seta Baud-Rate para 9600, tamanho de 8 bits e sem paridade
     options.c_iflag = IGNPAR;                         // Ignora caracteres com erros de paridade
     options.c_oflag = 0;
     options.c_lflag = 0;
@@ -77,12 +79,8 @@ int main()
         uart_tx(digital, uart_filestream);
         break;
     case 4:
-        // Envia o codigo da requisicao para acender o led
+        // Envia o codigo da requisicao para acender/apagar o led
         uart_tx(led, uart_filestream);
-        break;
-    case 5:
-        // Envia o codigo da requisicao para desligar o led
-        uart_tx(ledOFF, uart_filestream);
         break;
     default:
         continue;
@@ -125,7 +123,7 @@ int main()
             else if (comandoResposta[0] == '1')  // Valor sensor analógico
             // Posição 0 - Tipo de resposta.
             {
-                dado = comandoResposta[1];          // Posição 1 - Qtd de dígitos do dado.
+                char dado = comandoResposta[1];          // Posição 1 - Qtd de dígitos do dado.
                 int tamanho = dado - '0';           // Converte o char para int.  
                 int aux = dado + 1;
                 char valorDado[aux];            // Armazena o valor da entrada analógica.
@@ -150,7 +148,7 @@ int main()
             }
             else if (comandoResposta[0] == '2')  // Valor sensor digital.
             {
-                dado = comandoResposta[1];      // Posição 1 - Dado 
+                char dado = comandoResposta[1];      // Posição 1 - Dado 
                 printf("\nValor da entrada digital");
                 printf("%s ", dado);            // Imprime valor da entrada digital
                 // int dado = comandoResposta[1] - '0';

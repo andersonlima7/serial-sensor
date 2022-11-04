@@ -7,22 +7,19 @@ extern void initLCD();
 extern void clearLCD();
 extern void writeChar(char c);  //Escreve no display.
 
+extern void writeLCD(char string[]);
+
 
 /**
  * Recebe uma string e escreve  no display.
 */
 void writeLCD(char string[])  {
+    mapMem();
+    initLCD();
+    // clearLCD();
     int length = strlen(string);
     for (int i = 0; i< length; i++){
-        writeChar(string[i]);
+        // writeChar(string[i]);
     }
 }
 
-int main()
-{
-    mapMem();
-    initLCD();
-    clearLCD();
-    writeLCD("Ola");
-    return(0);
-}
