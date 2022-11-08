@@ -6,9 +6,9 @@ Este projeto tem por objetivo a construção de um sistema de comunicação entr
 
 - [Introdução](#introdução)
 - [Objetivo](#objetivo)
-- [Metolodogia](#passo-a-passo)
+- [Metolodogia](#metodologia)
 - [Desenvolvimento](#desenvolvimento)
-- [Testes e Simulações](#testes-e-simulacoes)
+- [Testes e Simulações](#testes-e-simulações)
 - [Referências](#referências)
 
 ## Introdução
@@ -21,11 +21,11 @@ Realizar a comunicação serial, via UART (Universal asynchronous receiver/trans
 
 ## Metodologia
 
-Inicialmente os esforços foram direcionados a construção da estrutura necessária para que o SBC pudesse realizar a comunicação via UART, tanto quanto enviar os comandos (tx), fator essencial dado que todo o sistema de comunicação é controlado pela Raspberry, quanto receber as respostas às solicitações enviadas (rx), inicialmente testou-se a comunicação apenas da placa SBC implementando um loopback ao conectar o pino rx com o tx da própria raspberry. Ao finalizar a estrutura de comunicação da SBC, iniciou-se a construção dos mecanismos de captura dos valores dos sensores, bem como, a comunicação via UART no microcontrolador Node MCU.
+Inicialmente os esforços foram direcionados a construção da estrutura necessária para que o SBC pudesse realizar a comunicação via UART, tanto quanto enviar os comandos (tx), fator essencial dado que todo o sistema de comunicação é controlado pela Raspberry, quanto receber as respostas às solicitações enviadas (rx), inicialmente testou-se a comunicação apenas da placa SBC implementando um loopback ao conectar o pino rx com o tx da própria raspberry. Ao finalizar a estrutura de comunicação da SBC, iniciou-se a construção dos mecanismos de captura dos valores dos sensores, bem como, a comunicação via UART no microcontrolador Node MCU. Após construir e testar separadamente a ESP8266, iniciou-se o processo de integração da comunicação entre o ente central, a SBC, e o Node MCU; os pinos RX e TX da SBC foram conectados aos pinos TX e RX do node MCU, o que permite uma conexão e comunicação entre ambos. Inicialmente houveram alguns gargalos de comunicação, sincronização e definição de valores a ser transmitido, no entanto esses elementos foram sendo ajustados a partir de testes e de algumas pesquisas sobre os elementos necessários.
 
 ## Desenvolvimento
 
-![Diagrama de Blocos](URL da imagem)
+![Diagrama de Blocos](https://github.com/andersonlima7/serial-sensor/blob/develop/diagrama.png?raw=true)
 
 ## Testes e Simulações
 
