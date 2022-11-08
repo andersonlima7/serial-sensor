@@ -4,9 +4,7 @@
 
 .global initLCD
 .global writeChar
-.global writeDigit
 .global clearLCD 
-.global writeNumber
 
 
 @ Delay
@@ -26,49 +24,21 @@
         GPIOTurnOff E
 .endm
 
-@ Define o pino como saída
-@ Autor: Sthepen Smith
-.macro GPIODirectionOut pin
-        ldr r2, =\pin @ offset of select register 
-        ldr r2, [r2] @ load the value  GPFSEL0 - GPFSEL1 - GPFSEL2  
-        ldr r1, [r8, r2] @ address of register -> 001 000 000 000 000 000 000 000 001 000 (Digamos que o pino1 e pino9 estejam como saidas)
-        ldr r3, =\pin @ address of pin table 
-        add r3, #4 @ load amount to shift from table Acessa a word para saber qual pino deve ser selecionado
-        ldr r3, [r3] @ load value of shift amt FSEL0 - FSEL1 - FSEL2... FSEL25
-        mov r0, #0b111 @ mask to clear 3 bits -> 111
-        lsl r0, r3 @ shift into position ->        000 000 000 111 000 000 000 000 000 000 (posicao 18 - para o pino6 por exemplo)
-        bic r1, r0 @ clear the three bits ->       001 000 000 000 000 000 000 000 001 000 Limpa os bits somente da posicao selecionada
-        mov r0, #1 @ 1 bit to shift into pos 
-        lsl r0, r3 @ shift by amount from table -> 000 000 000 001 000 000 000 000 000 000 (Coloca 1 bit na posicao certa)
-        @ para definir o pino6 como saida, por exemplo.
-        orr r1, r0 @ set the bit -> Define o bit no r1 001 000 000 001 000 000 000 000 001 000 (pino6 agora ativo)
-        str r1, [r8, r2] @ save it to reg to do work -> Salva no registrador para executar o comando
-        .ltorg
-.endm
-
-.macro SetOutputs
-        GPIODirectionOut D4
-        GPIODirectionOut D5
-        GPIODirectionOut D6
-        GPIODirectionOut D7
-        GPIODirectionOut RS
-        GPIODirectionOut E
-.endm
-
-
 @ Define o pino como nível lógico alto ou baixo.
 .macro GPIOTurn pin value
-        mov r2, r8
-        mov r0, \value
-        cmp r0, #0
-        addeq r2, #clrregoffset
-        addne r2, #setregoffset
-        mov r0, #1 @ 1 bit to shift into pos
-        ldr r3, =\pin @ base of pin info table
-        add r3, #8 @ add offset for shift amt
-        ldr r3, [r3] @ load shift from table
-        lsl r0, r3 @ do the shift
-        str r0, [r2] @ write to the register
+        mov r0, #40             @Move #40 para R0 (40 é o offset do clear register)
+        mov r2, #12             @Move #12 para R2 (12 é a diferença entre os offsets do clear e do set registeRS)
+        mov r1, \value            @Move para R1 o valor do nível lógico desejado
+        mul r5, r1, r2          @Multiplica 12 pelo nível lógico recebido
+        sub r0, r0, r5          @Subtrai 40 pelo resultado obtido na operação anterior
+        mov r2, r8              @Move o endereço base dos GPIO obtido no mapeamento para o R2
+        add r2, r2, r0          @Soma a esse endereço o offset calculado nas operações anteriores, podendo ser 28 (set register) ou 40 (clear register)
+        mov r0, #1              @Move #1 para R0
+        ldr r3, =\pin           @Carrega o endereço de memória contendo o offset do GPFSel em R3
+        add r3, #8              @Adiciona 8 a esse endereço, para obter o endereço que contém a posição do bit responsável por definir o nível lógico daquele pino específico
+        ldr r3, [r3]            @Carrega o valor contido nesse endereço em R3
+        lsl r0, r3              @Desloca o bit colocado em R0 para a posição obtida na operação anterior
+        str r0, [r2]            @Armazena no registrador de clear ou set o nível lógico do pino atualizado
 .endm
 
 @ Define o pino como nível lógico alto.
@@ -196,52 +166,12 @@
         .ltorg
 .endm
 
-@ Controla os pinos D4, D5, D6, D7 e RS do display
-.macro Write value1 value2
-       mov r4, #0b10000
-       orr r4, \value1
-       WriteLCD r4
-       mov r4, #0b10000
-       orr r4, \value2
-       WriteLCD \value2
-.endm
-
-
-
-@Escreve um número no display a partir do valor informado deste mesmo número
-.macro WriteNumber value
-        @ value - 4 bits do número em binário.
-
-        @ Seleciona as colunas de dígito do display
-        WriteLCD #0b10011 
-
-        mov r4, #0b10000 @ Deixa o bit correspondente ao pino do RS ligado, isto é, deixa o LCD em modo dados.
-        orr r4, \value          @ 10000 OR 10110 (exemplo) = 10110 
-        WriteLCD r4
-        .ltorg
-.endm
 
 
 @ Limpa o display e retorna o cursor para a posição inicial
 .macro clearLCD
-        @ 0 0 0 0 0
-        GPIOTurnOff D4
-        GPIOTurnOff D5
-        GPIOTurnOff D6
-        GPIOTurnOff D7
-        GPIOTurnOff RS
-        enable
-
-        @ 0 0 0 0 1
-        GPIOTurnOn D4
-        GPIOTurnOff D5
-        GPIOTurnOff D6
-        GPIOTurnOff D7
-        GPIOTurnOff RS
-        enable
-
-        @WriteLCD #0b00000
-        @WriteLCD #0b00001
+        WriteLCD #0b00000
+        WriteLCD #0b00001
 .endm
 
 @ Desloca o cursor ou o display para esquerda/direita.
@@ -301,30 +231,9 @@
         .ltorg
 .endm
 
-@ Divisão de inteiros
-@ N - Numerador
-@ D - Denominador
-.macro division N D
-    @ r10 - resultado
-    @ r11 - resto
-    @ r12 - denominador
-    mov r10, #0 
-    mov r11, \N
-    mov r12, \D 
-    bl loopDivision
-.endm
 
-@ Realiza a divisão como o dividendo atual
-loopDivision:
-        cmp r11, r12
-        bxlo lr @ Condição de parada -> r1 = resto < r2 = denominador
-        sub r11, r12
-        add r10, #1
-        b loopDivision
-        
 
 initLCD:
-        SetOutputs
         Initialization
         bx lr
 
@@ -333,39 +242,11 @@ writeChar:
         WriteLCDFull r10
         bx lr
 
-writeDigit:
-        movs r10, r0 @ Número
-        WriteNumber r10
-        bx lr
-
 clearLCD:
         clearLCD
         bx lr
 
 
-writeNumber:
-        push {lr}
-        mov r5, r0
-        bl divisions
-        WriteNumber r10
-        pop {lr}
-        bx lr
-        
-divisions:
-        push {lr} @coloca na pilha o registrador LR (Link Register) - cria um indicador de retorno na pilha para onde o PC deve voltar após a execução
-        SetOutputs
-        mov r7, #10
-        division r5, r7         @ realiza a divisao do valor dividendo atual por 10
-        WriteNumber r11         @ escreve o 3 | escreve o 2
-        cursorDisplayShift #0, #0 @Desloca o cursor para esquerda
-        cursorDisplayShift #1, #1 @Desloca todo o conteudo do display para a direita (liberando a esquerda)
-        cursorDisplayShift #0, #0 @Desloca o cursor para a esquerda
-        
-        mov r5, r10 @atualiza o dividendo atual para que seja o resultado da divisao realizada
-        cmp r5, #10 @compara o dividendo com 10
-        pop {lr} @remove o registrador LR da pilha
-        bxlo lr         @ casoo valor  r5 < 10 entao retorna para o ponto indicado pelo link register
-        b divisions @ senao continua fazendo a divisao
 
 
 .data

@@ -153,15 +153,16 @@ void loop() {
       }
         break;
       case 0x06: //Controla o LED, ligando se estiver desligado ou desligando se estiver ligado.
-        digitalWrite(ledPin, !digitalRead(ledPin));
-        if(digitalRead(ledPin)) // LED ligado
         {
-          command = 0x03;
-          Serial.write(command);
-        }
-        else {
-          command = 0x04;
-          Serial.write(command);
+          int ligado = digitalRead(ledPin);
+          digitalWrite(ledPin, !ligado);
+          if(!ligado) // LED desligado
+          {
+            Serial.write(0x04);
+          }
+          else {   // Led ligado
+            Serial.write(0x03);
+          }
         }
         break;
       default:
@@ -175,9 +176,3 @@ void loop() {
   }
 }
 
-int numberDigits(int number) {
-  if (number < 10) return 1;
-  if (number < 100) return 2;
-  if (number < 1000) return 3;
-  if (number < 10000) return 4;
-}
