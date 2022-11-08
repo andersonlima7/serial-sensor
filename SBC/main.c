@@ -5,39 +5,40 @@
 #include <fcntl.h>   //Usado para UART
 #include <termios.h> //Usado para UART
 
-
 extern void mapMem();
 extern void initLCD();
 extern void clearLCD();
-extern void writeChar(char c);  //Escreve no display.
+extern void writeChar(char c); // Escreve no display.
 
 /**
  * Recebe uma string e escreve  no display.
-*/
-void writeLCD(char string[])  {
+ */
+void writeLCD(char string[])
+{
     int length = strlen(string);
-    for (int i = 0; i< length; i++){
+    for (int i = 0; i < length; i++)
+    {
         writeChar(string[i]);
     }
 }
 
 void uart_tx(unsigned char com, unsigned char addr, int uart_filestream); // Funcao para envio de dados
-unsigned char uart_rx();   // Funcao para recebimento de dados
+unsigned char uart_rx();                                                  // Funcao para recebimento de dados
 
-#define SITUACAO_ATUAL 0x03   // codigo da situacao atual
+#define SITUACAO_ATUAL 0x03    // codigo da situacao atual
 #define ENTRADA_ANALOGICA 0x04 // codigo do valor da entrada analogica
-#define SENSOR_DIGITAL 0x05  // codigo do valor da entrada digital
-#define CONTROLAR_LED 0x06      // codigo para acender/desligar o led
+#define SENSOR_DIGITAL 0x05    // codigo do valor da entrada digital
+#define CONTROLAR_LED 0x06     // codigo para acender/desligar o led
 int uart_filestream = -1;
-int sensor = 0;                     // Armazena a opcao do sensor selecionado pelo usuário.
+int sensor = 0; // Armazena a opcao do sensor selecionado pelo usuário.
 
 int main()
 {
     mapMem();
     initLCD();
-    writeLCD("Corinthians");
+    writeLCD("Problema #2");
     clearLCD();
-    int comando = 0;                    // Armazena a opcao de comando selecionado pelo usuário.
+    int comando = 0; // Armazena a opcao de comando selecionado pelo usuário.
 
     //-----------------------------------------------------------------------------------------------------------------------------------
     // Configuracao da UART
@@ -58,7 +59,6 @@ int main()
     tcflush(uart_filestream, TCIFLUSH); // Libera entrada pendente. Esvazia a saida nao transmitida.
     tcsetattr(uart_filestream, TCSANOW, &options);
 
-
     while (comando != -1)
     {
 
@@ -74,7 +74,10 @@ int main()
         if (comando == 3)
         {
             printf("\nSelecione o sensor que deseja saber a medição\n"); // De 1 a 8?
+            char msg[14];
             scanf("%i", &sensor);
+            sprintf(msg, "Sensor %i", sensor);
+            writeLCD(msg);
         }
 
         // ENVIO DO CODIGO DA REQUISICAO
@@ -154,7 +157,8 @@ unsigned char uart_rx()
     }
     if (comandoResposta[0] == 0x00)
     {
-        writeLCD("Node MCU: OK");
+        printf("Node MCU OK!");
+        writeLCD("Node MCU OK!");
     }
     else if (comandoResposta[0] == 0x01) // Valor sensor analógico
     // Posição 0 - Tipo de resposta.
@@ -171,24 +175,22 @@ unsigned char uart_rx()
         printf("\nValor da entrada digital");
         printf("Sensor%i: %i", sensor, dado); // Imprime valor da entrada digital
         char msg[14];
-        if (dado == 1) {
-            sprintf(msg, "Sensor %i: LOW", sensor); 
-        }
-        else{
-            sprintf(msg, "Sensor %i: HIGH", sensor); 
-        }        
+        sprintf(msg, "Sensor %i: %i", sensor, dado);
         writeLCD(msg);
     }
     else if (comandoResposta[0] == 0x03)
     {
+        printf("LED: ON");
         writeLCD("LED: ON");
     }
     else if (comandoResposta[0] == 0x04)
     {
+        printf("LED: OFF");
         writeLCD("LED: OFF");
     }
     else
     {
-        writeLCD("NodeMCU: Erro");
+        printf("NodeMCU Erro!");
+        writeLCD("NodeMCU Erro!");
     }
 }
