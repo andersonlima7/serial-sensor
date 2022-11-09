@@ -2,7 +2,7 @@
 .global clearLCD
 
 @ Limpa o display.
-clearLCD
+clearLCD:
         @ Clear
         clearLCD
         bx lr

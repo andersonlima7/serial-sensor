@@ -158,10 +158,10 @@ void loop() {
           digitalWrite(ledPin, !ligado);
           if(!ligado) // LED desligado
           {
-            Serial.write(0x04);
+            Serial.write(0x08);
           }
           else {   // Led ligado
-            Serial.write(0x03);
+            Serial.write(0x07);
           }
         }
         break;

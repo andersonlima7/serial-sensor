@@ -2,7 +2,7 @@
 .global writeChar
 
 @ Escreve um char no display.
-writeChar
+writeChar:
         movs r10, r0 @Coluna
         WriteLCDFull r10
         bx lr

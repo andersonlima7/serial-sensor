@@ -34,11 +34,12 @@ void uart_tx(unsigned char comando, unsigned char endereco, int uart_filestream)
  * @return Os dados recebidos do NodeMCU. 
 */
 unsigned char uart_rx();                                                 
+unsigned char resposta[256];                                                 
 
-const int situacao_atual = 0x03    // código que requisita a situacao atual do NodeMCU.
-const int entrada_analogica = 0x04 // código que requisita o valor da entrada analogica.
-const int sensor_digital = 0x05    // código que requisita o valor da entrada digital.
-const int controlar_led = 0x06     // código que requisita ligar/desligar o led.
+const int situacao_atual = 0x03  ;  // código que requisita a situacao atual do NodeMCU.
+const int entrada_analogica = 0x04; // código que requisita o valor da entrada analogica.
+const int sensor_digital = 0x05;    // código que requisita o valor da entrada digital.
+const int controlar_led = 0x06;     // código que requisita ligar/desligar o led.
 int uart_filestream = -1;
 int sensor = 0; // Armazena a opcao do sensor selecionado pelo usuário.
 
@@ -46,8 +47,7 @@ int main()
 {
     mapMem();
     initLCD();
-    writeLCD("Problema #2");
-    // writeLCD("Comunicacao Serial");
+    writeLCD("Problema#2-E/S");
     int comando = 0; // Armazena a opcao de comando selecionado pelo usuário.
 
 
@@ -62,7 +62,7 @@ int main()
     if (uart_filestream == -1)
     {
         printf("\nErro na abertura da UART.\n");
-        writeLCD("Error:OPEN UART")
+        writeLCD("Error:OPEN UART");
     }
 
     // 
@@ -95,10 +95,7 @@ int main()
         if (comando == 3) //Comando da entrada digital.
         {
             printf("\nSelecione o sensor que deseja saber a medição\n"); // De 1 a 8?
-            char msg[14];
             scanf("%i", &sensor);
-            sprintf(msg, "Sensor %i", sensor);
-            writeLCD(msg);
         }
 
         // Envia o código do comando requisitado para o NodeMCU.
@@ -106,19 +103,24 @@ int main()
         {
         case 1:
             // Envia o código da requisição de situação atual do sensor.
+            writeLCD("Situaçao atual");
             uart_tx(situacao_atual, 0, uart_filestream);
             break;
 
         case 2:
             // Envia o código da requisição do valor da entrada analógica.
+            writeLCD("Valor analogico");
             uart_tx(entrada_analogica, 0, uart_filestream);
             break;
         case 3:
             // Envia o código da requisição do valor de uma entrada digital.
+            writeLCD("Sensor ");
+            // writeLCD(sensor);
             uart_tx(sensor_digital, sensor, uart_filestream);
             break;
         case 4:
             // Envia o código da requisição para acender/apagar o led.
+            writeLCD("Controlar LED");
             uart_tx(controlar_led, 0, uart_filestream);
             break;
         default:
@@ -127,11 +129,8 @@ int main()
         clearLCD();
         sleep(2); // Aguarda receber os dados.
 
-        unsigned char resposta[100] = uart_rx(); //Resposta do NodeMCU.
-
-        if(strcmp(resposta, 'E') == 0) { // Erro
-            continue;
-        }
+        
+        uart_rx(); //Resposta do NodeMCU.
 
         switch (resposta[0]) // Comando de resposta.
         {
@@ -147,18 +146,20 @@ int main()
             writeLCD(resposta);
             break;
         case 0x02:
+        {
             int dado = resposta[1]; // Posição 1 - Dado
             printf("\nValor da entrada digital");
             printf("Sensor%i: %i", sensor, dado); // Imprime valor da entrada digital
             char msg[14];
             sprintf(msg, "Sensor %i: %i", sensor, dado);
             writeLCD(msg);
+        }
             break;
-        case 0x03:
+        case 0x07:
             printf("LED: ON");
             writeLCD("LED: ON");
             break;
-        case 0x04:
+        case 0x08:
             printf("LED: OFF");
             writeLCD("LED: OFF");
             break;
@@ -188,13 +189,13 @@ void uart_tx(unsigned char comando, unsigned char endereco, int uart_filestream)
         int count = write(uart_filestream, &tx_buffer[0], (p_tx_buffer - &tx_buffer[0])); 
         if (count < 0) {
             printf("Erro ao enviar os dados");
-            writeLCD("Erro: Envio";)
+            writeLCD("Erro: Envio");
         }
     }
     else
     {
         printf("\nFalha na abertura do arquivo");
-        writeLCD("Error: OPEN FILE";)
+        writeLCD("Error: OPEN FILE");
     }
 }
 
@@ -202,25 +203,22 @@ void uart_tx(unsigned char comando, unsigned char endereco, int uart_filestream)
 
 unsigned char uart_rx()
 {
-    unsigned char resposta[256];
     int rx_length = read(uart_filestream, (void *)resposta, 255);
     printf("Tamanho da resposta: %d\n", rx_length);
     if (rx_length < 0)
     {
         printf("Erro no recebimento da resposta.");
-        writeLCD("Erro: Resposta");
-        return 'E'; //Indica erro
+        writeLCD("NodeMCU ERRO!");
+        
     }
     else if (rx_length == 0)
     {
         printf("Nenhum dado disponível\n");
-        writeLCD("Erro: dado vazio");
-        return 'E'; //Indica erro
+        writeLCD("NodeMCU ERRO!");
     }
     else
     {
         resposta[rx_length] = '\0';
     }
 
-    return resposta;
 }
