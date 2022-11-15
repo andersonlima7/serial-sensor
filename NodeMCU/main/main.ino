@@ -120,7 +120,7 @@ void setup() {
   command = -1; // Comando requisitado
   address = -1; // Endereço requisitado
   digitalWrite(ledPin,HIGH);
-  Serial.begin(9600);
+  Serial.begin(9600); //Inicia a uart com um baudrate de 9600.
 }
 
 void loop() {
@@ -138,15 +138,15 @@ void loop() {
         break;
       case 0x04: // Valor da entrada analógica.
         analogValue = analogRead(sensorAnalog);       // Ler o valor atual da entrada analógica. 
-        command = 0x01;            //
+        command = 0x01;            
         Serial.write(command);
-        Serial.print(analogValue);
+        Serial.print(analogValue);                    //Envia os dados para a porta serial como um texto ASCII.
         break;
       case 0x05: // Valor da entrada digital.
       {
-        int pino = address;                    // Valor do pino
+        int pino = address;                          // Pino que o sensor está pinado.
         pinMode(pino, INPUT);                        // Define o pino como entrada.
-        digitalValue = digitalRead(pino);            // Ler o valor do pino
+        digitalValue = digitalRead(pino);            // Ler o valor do sensor neste pino.
         command = 0x02;
         Serial.write(command);
         Serial.write(digitalValue);
@@ -158,15 +158,15 @@ void loop() {
           digitalWrite(ledPin, !ligado);
           if(!ligado) // LED desligado
           {
-            Serial.write(0x04);
+            Serial.write(0x08);
           }
           else {   // Led ligado
-            Serial.write(0x03);
+            Serial.write(0x07);
           }
         }
         break;
       default:
-          command = 0x1F;
+          command = 0x1F; //Problema na requisicao ao NodeMCU.
           Serial.write(command);
           break;
     }
