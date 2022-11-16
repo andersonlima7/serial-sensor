@@ -35,7 +35,7 @@ Na interface de comunicação serial, somente um bit de informação é transmit
 
 ### Diagrama de Blocos
 
-![Diagrama de Blocos](https://github.com/andersonlima7/serial-sensor/blob/develop/diagrama_bloco.png?raw=true)
+![Diagrama de Blocos](https://github.com/andersonlima7/serial-sensor/blob/main/diagrama_bloco.png?raw=true)
 
 <center>Figura 1. Diagrama de Blocos que representa a solução desenvolvida no problema.</center>
 
