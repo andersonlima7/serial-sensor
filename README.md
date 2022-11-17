@@ -39,6 +39,65 @@ Na interface de comunicação serial, somente um bit de informação é transmit
 
 <center>Figura 1. Diagrama de Blocos que representa a solução desenvolvida no problema.</center>
 
+
+### Protocolo
+
+A tabela a seguir especifica qual foi o protocolo de comunicação utilizado na solução do problema. Na tabela estão contidos os comandos que são enviados a partir do SBC para o NodeMCU, o que eles significam na prática e os códigos de resposta correspondente a essas requisições.
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-wa1i{font-weight:bold;text-align:center;vertical-align:middle}
+.tg .tg-nrix{text-align:center;vertical-align:middle}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-wa1i">Comando (SBC -&gt; NODEMCU)</th>
+    <th class="tg-wa1i">Descrição</th>
+    <th class="tg-wa1i">Resposta (NODEMCU -&gt; SBC)</th>
+    <th class="tg-wa1i">Descrição</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-nrix" rowspan="2">0x03</td>
+    <td class="tg-nrix" rowspan="2">Solicita a situação atual do NodeMCU</td>
+    <td class="tg-nrix">0x00</td>
+    <td class="tg-nrix">NodeMCU OK</td>
+  </tr>
+  <tr>
+    <td class="tg-nrix">0x1F</td>
+    <td class="tg-nrix">NodeMCU ERRO</td>
+  </tr>
+  <tr>
+    <td class="tg-nrix">0x04</td>
+    <td class="tg-nrix">Solicita o valor da entrada analógica</td>
+    <td class="tg-nrix">0x01 + Dado (~0 a 1024)</td>
+    <td class="tg-nrix">Valor da entrada analógica</td>
+  </tr>
+  <tr>
+    <td class="tg-nrix">0x05 + Endereço do Sensor</td>
+    <td class="tg-nrix">Solicita o valor da entrada digital</td>
+    <td class="tg-nrix">0x02 + Dado(0 ou 1)</td>
+    <td class="tg-nrix">Valor da entrada digital</td>
+  </tr>
+  <tr>
+    <td class="tg-nrix" rowspan="2">0x06</td>
+    <td class="tg-nrix" rowspan="2">Controla o LED(Liga/Desliga)</td>
+    <td class="tg-nrix">0x07</td>
+    <td class="tg-nrix">LED ligado.</td>
+  </tr>
+  <tr>
+    <td class="tg-nrix">0x08</td>
+    <td class="tg-nrix">LED desligado.</td>
+  </tr>
+</tbody>
+</table>
+
 ### SBC-Side
 
 A solução final do problema se deu de modo a, inicialmente, configurar o ambiente UART separadamente, tanto na Raspberry (SBC), quanto na Node MCU, definindo modo de abertura (já que uma das formas de controle da UART na SBC se dá de modo a ler e escrever arquivo onde a mesma tem seu driver localizado), baudrate (taxa de transmissão) e outros elementos necessários ao funcionamento da UART na Raspberry. Junto a isso fora configurado as funções responsáveis pelo envio e recebimento de informações em dois métodos `uart_tx` e `uart_rx`, respectivamente.
