@@ -44,59 +44,52 @@ Na interface de comunicação serial, somente um bit de informação é transmit
 
 A tabela a seguir especifica qual foi o protocolo de comunicação utilizado na solução do problema. Na tabela estão contidos os comandos que são enviados a partir do SBC para o NodeMCU, o que eles significam na prática e os códigos de resposta correspondente a essas requisições.
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-wa1i{font-weight:bold;text-align:center;vertical-align:middle}
-.tg .tg-nrix{text-align:center;vertical-align:middle}
-</style>
-<table class="tg">
+<table>
 <thead>
   <tr>
-    <th class="tg-wa1i">Comando (SBC -&gt; NODEMCU)</th>
-    <th class="tg-wa1i">Descrição</th>
-    <th class="tg-wa1i">Resposta (NODEMCU -&gt; SBC)</th>
-    <th class="tg-wa1i">Descrição</th>
+    <th>Comando (SBC -&gt; NODEMCU)</th>
+    <th>Descrição</th>
+    <th>Resposta (NODEMCU -&gt; SBC)</th>
+    <th>Descrição</th>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td class="tg-nrix" rowspan="2">0x03</td>
-    <td class="tg-nrix" rowspan="2">Solicita a situação atual do NodeMCU</td>
-    <td class="tg-nrix">0x00</td>
-    <td class="tg-nrix">NodeMCU OK</td>
+    <td rowspan="2">0x03</td>
+    <td rowspan="2">Solicita a situação atual do NodeMCU</td>
+    <td>0x00</td>
+    <td>NodeMCU OK</td>
   </tr>
   <tr>
-    <td class="tg-nrix">0x1F</td>
-    <td class="tg-nrix">NodeMCU ERRO</td>
+    <td>0x1F</td>
+    <td>NodeMCU ERRO</td>
   </tr>
   <tr>
-    <td class="tg-nrix">0x04</td>
-    <td class="tg-nrix">Solicita o valor da entrada analógica</td>
-    <td class="tg-nrix">0x01 + Dado (~0 a 1024)</td>
-    <td class="tg-nrix">Valor da entrada analógica</td>
+    <td>0x04</td>
+    <td>Solicita o valor da entrada analógica</td>
+    <td>0x01 + Dado (~0 a 1024)</td>
+    <td>Valor da entrada analógica</td>
   </tr>
   <tr>
-    <td class="tg-nrix">0x05 + Endereço do Sensor</td>
-    <td class="tg-nrix">Solicita o valor da entrada digital</td>
-    <td class="tg-nrix">0x02 + Dado(0 ou 1)</td>
-    <td class="tg-nrix">Valor da entrada digital</td>
+    <td>0x05 + Endereço do Sensor</td>
+    <td>Solicita o valor da entrada digital</td>
+    <td>0x02 + Dado(0 ou 1)</td>
+    <td>Valor da entrada digital</td>
   </tr>
   <tr>
-    <td class="tg-nrix" rowspan="2">0x06</td>
-    <td class="tg-nrix" rowspan="2">Controla o LED(Liga/Desliga)</td>
-    <td class="tg-nrix">0x07</td>
-    <td class="tg-nrix">LED ligado.</td>
+    <td rowspan="2">0x06</td>
+    <td rowspan="2">Controla o LED(Liga/Desliga)</td>
+    <td>0x07</td>
+    <td>LED ligado.</td>
   </tr>
   <tr>
-    <td class="tg-nrix">0x08</td>
-    <td class="tg-nrix">LED desligado.</td>
+    <td>0x08</td>
+    <td>LED desligado.</td>
   </tr>
 </tbody>
 </table>
+
+
 
 ### SBC-Side
 
